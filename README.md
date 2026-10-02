@@ -4,7 +4,7 @@
 
 This project uses supervised machine learning to predict whether a student is likely to achieve satisfactory academic performance based on demographic, academic, behavioural and social factors.
 
-The project follows an end-to-end machine learning workflow covering data understanding, exploratory data analysis, data preparation, model building, evaluation and overfitting analysis.
+The project follows an end-to-end machine learning workflow covering data understanding, exploratory data analysis, data preparation, model building, evaluation, overfitting analysis and prediction of new student performance.
 
 ## Objective
 
@@ -15,7 +15,7 @@ The objectives of this project are to:
 - Build multiple classification models.
 - Compare model performance using standard evaluation metrics.
 - Analyse overfitting and model generalisation.
-- Identify the model with the strongest test performance.
+- Use the trained model to predict the performance of a new student.
 
 ## Dataset
 
@@ -42,7 +42,7 @@ The final grade (`G3`) is converted into:
 - `G3 >= 10` → Pass
 - `G3 < 10` → Fail
 
-The earlier-period grades `G1` and `G2` are excluded from the model inputs because they are strongly related to the final grade and would make the prediction less useful.
+Previous grades (`G1` and `G2`) are included as input features because they provide information about the student's earlier academic performance. The final grade (`G3`) is excluded from the model inputs because it is used to create the Pass/Fail target.
 
 ## Workflow
 
@@ -62,6 +62,10 @@ Model Evaluation
 Overfitting Analysis
         ↓
 Final Recommendation
+        ↓
+Student Performance Prediction
+        ↓
+Prediction Analysis
 ```
 
 ## Models Used
@@ -93,7 +97,7 @@ The models were evaluated using the following metrics:
 - **Recall:** Measures how many of the actual **Pass** students were correctly identified.
 - **F1 Score:** Combines Precision and Recall into a single metric, providing a balanced measure of model performance.
 
-These metrics were used to compare the four classification models and determine their performance on unseen test data.
+These metrics were used to compare the four classification models on unseen test data.
 
 ## Results
 
@@ -101,18 +105,84 @@ The models were evaluated using **Accuracy, Precision, Recall, and F1 Score**.
 
 | Model | Accuracy | Precision | Recall | F1 Score |
 |---|---:|---:|---:|---:|
-| Logistic Regression | 63.29% | 70.69% | 77.36% | 73.87% |
-| Decision Tree | 67.09% | 72.13% | 83.02% | 77.19% |
-| Random Forest | 68.35% | 70.59% | 90.57% | 79.34% |
-| KNN | 60.76% | 66.18% | 84.91% | 74.38% |
+| Logistic Regression | 84.81% | 93.62% | 83.02% | 88.00% |
+| Decision Tree | 86.08% | 97.73% | 81.13% | 88.66% |
+| Random Forest | 87.34% | 95.74% | 84.91% | 90.00% |
+| KNN | 69.62% | 72.31% | 88.68% | 79.66% |
 
-Random Forest achieved the highest **test accuracy (68.35%)** and **F1 Score (79.34%)** among the evaluated models. However, its 100% training accuracy indicated significant overfitting, which was further analysed and addressed through model tuning.
+Random Forest achieved the highest **test accuracy (87.34%)** and **F1 Score (90.00%)** among the evaluated models.
+
+### Random Forest Confusion Matrix
+
+| Actual / Predicted | Fail | Pass |
+|---|---:|---:|
+| **Fail** | 24 | 2 |
+| **Pass** | 8 | 45 |
+
+## Overfitting Analysis
+
+Training and testing accuracy were compared to identify possible overfitting.
+
+| Model | Training Accuracy | Testing Accuracy |
+|---|---:|---:|
+| Logistic Regression | 97.15% | 84.81% |
+| Decision Tree | 98.73% | 86.08% |
+| Random Forest | 100.00% | 87.34% |
+| KNN | 81.96% | 69.62% |
+
+The original Random Forest achieved 100% training accuracy and 87.34% testing accuracy, indicating some overfitting.
+
+A tuned Random Forest was also tested:
+
+- **Training Accuracy:** 96.20%
+- **Testing Accuracy:** 86.08%
+
+The tuning reduced the training accuracy and therefore reduced overfitting, but it also slightly reduced test accuracy. Therefore, the original Random Forest was retained as the final model because it provided the strongest test performance among the evaluated models.
+
+## Student Performance Prediction
+
+The trained Random Forest model can be used to predict whether a new student is likely to **Pass** or **Fail** based on previous grades and other student-related factors.
+
+The prediction also displays the model's estimated probabilities for the Pass and Fail classes.
+
+For example:
+
+```text
+Predicted Performance: Pass
+Probability of Fail: 7.00%
+Probability of Pass: 93.00%
+```
+
+These probabilities represent the model's estimated support for each class and should not be interpreted as a guarantee of the student's actual outcome.
+
+## Prediction Analysis
+
+Feature importance was analysed to understand which features the Random Forest relied on most across its predictions.
+
+The top 10 features were:
+
+| Feature | Importance |
+|---|---:|
+| G2 | 35.78% |
+| G1 | 19.81% |
+| failures | 4.35% |
+| absences | 3.82% |
+| goout | 2.78% |
+| age | 2.51% |
+| Walc | 1.96% |
+| health | 1.79% |
+| Medu | 1.64% |
+| Fedu | 1.63% |
+
+Previous grades (`G1` and `G2`) had the highest feature importance in the trained Random Forest, followed by previous failures and absences.
+
+Feature importance represents the model's reliance on these features during prediction. It should not be interpreted as a direct cause-and-effect relationship.
 
 ## Conclusion
 
-This project demonstrated an end-to-end supervised machine learning workflow for predicting student academic performance. The process included data exploration, data preparation, feature selection, categorical encoding, model training, evaluation, and overfitting analysis.
+This project demonstrated an end-to-end supervised machine learning workflow for predicting student academic performance. The process included data exploration, data preparation, feature selection, categorical encoding, model training, evaluation, overfitting analysis and prediction of new student performance.
 
-Four classification models were compared, with **Random Forest** achieving the highest test accuracy of **68.35%** and F1 Score of **79.34%**. The results demonstrate how machine learning can identify patterns in historical student data and support data-driven analysis of academic performance.
+Four classification models were compared, with **Random Forest** achieving the highest test accuracy of **87.34%** and F1 Score of **90.00%**. The trained model was also used to make predictions for new student inputs and analyse feature importance.
 
 ## Technologies Used
 
@@ -134,15 +204,22 @@ student-performance-ml/
 └── requirements.txt
 ```
 
+- **student_performance_prediction.ipynb** – Complete machine learning implementation and analysis.
+- **student-mat.csv** – Student performance dataset used for training and evaluation.
+- **README.md** – Project documentation.
+- **requirements.txt** – Required Python libraries.
+
 ## How to Run
 
 1. Install the required dependencies:
-```
+
+```bash
 pip install -r requirements.txt
 ```
 
 2. Open Jupyter Notebook:
-```
+
+```bash
 python -m notebook
 ```
 
